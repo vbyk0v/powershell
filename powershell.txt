@@ -1,0 +1,34 @@
+
+Rename-computer -newname 2016DC
+Get-NetAdapter
+New-NetIPAddress -InterfaceAlias Ethernet -IPAddress 192.168.44.9 -DefaultGateway 192.168.44.4 -AddressFamily IPv4 -PrefixLength 24
+Set-DnsClientServerAddress -InterfaceAlias Ethernet -ServerAddresses 127.0.0.1
+get-timezone
+Set-TimeZone -Id "Russian Standard Time"
+Restart-Computer
+
+======
+
+Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
+Install-ADDSForest -DomainName 44domain.ksm
+
+Get-Service adws,kdc,netlogon,dns
+pimng
+
+
+
+======
+
+
+Install-WindowsFeature DHCP -IncludeManagementTools
+Import-Module DHCPServer
+
+Get-Service | Where Status -eq "Running"
+get-service "dhcp*"
+
+	Stop-Service -Name dhcpserver
+	Start-Service -Name dhcpserver
+	restart-Service -Name dhcpserver
+
+Add-DhcpServerv4Scope -Name "44domain" -StartRange 192.168.44.10 -EndRange 192.168.44.250 -SubnetMask 255.255.255.0
+Set-DHCPServerv4OptionValue -DnsServer 172.18.0.2 -Router 192.168.44.4
